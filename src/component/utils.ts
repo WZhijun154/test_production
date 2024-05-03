@@ -1,3 +1,7 @@
-export const uploadFilesEndPoint = 'http://localhost:8000/upload';
-export const mergePdfEndPoint = 'http://localhost:8000/merge_pdf';
-export const downloadEndPoint = 'http://localhost:8000/download';
+// Make sure to include "NEXT_PUBLIC_" if these endpoints are used client-side.
+
+export const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND;
+
+export const uploadFilesEndPoint = `${backendBaseUrl}/upload`;
+export const mergePdfEndPoint = `${backendBaseUrl}/merge_pdf`;
+export const downloadEndPoint = `${backendBaseUrl}/download`;
