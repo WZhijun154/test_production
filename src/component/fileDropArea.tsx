@@ -13,6 +13,7 @@ import axios from 'axios';
 import { showErrorNotification } from './notify';
 import { upload } from './upload';
 import { Progress } from '@nextui-org/react';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 
 export interface UploadFileInfoProps {
   filename: string;
@@ -23,6 +24,8 @@ interface FileThumbnailProps {
   uploadedFileInfo: UploadFileInfoProps;
   onDelete: (fileName: string) => void;
 }
+
+export const uploadedFilesAtom = atom<UploadFileInfoProps[]>([]);
 
 const DragHandle = SortableHandle(() => (
   <div className='absolute w-full h-full'></div>
@@ -72,12 +75,13 @@ const SortableItem = SortableElement<FileThumbnailProps>(
 );
 
 interface SortableListProps {
-  uploadedFileInfos: UploadFileInfoProps[];
   onDelete: (fileName: string) => void;
 }
 
 const SortableList = SortableContainer<SortableListProps>(
-  ({ uploadedFileInfos, onDelete }: SortableListProps) => {
+  ({ onDelete }: SortableListProps) => {
+    const uploadedFileInfos = useAtomValue(uploadedFilesAtom);
+
     return (
       <div className='flex flex-row justify-start items-start gap-0'>
         {uploadedFileInfos.map((uploadedFileInfo, index) => (
@@ -94,16 +98,15 @@ const SortableList = SortableContainer<SortableListProps>(
 );
 
 interface FileThumbnailAreaProps {
-  uploadedFileInfos: UploadFileInfoProps[];
   onDelete: (fileName: string) => void;
   onSort: (uploadedFileInfos: UploadFileInfoProps[]) => void;
 }
 
 const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
-  uploadedFileInfos,
   onDelete,
   onSort,
 }) => {
+  const uploadedFileInfos = useAtomValue(uploadedFilesAtom);
   const onSortEnd = ({
     oldIndex,
     newIndex,
@@ -122,7 +125,6 @@ const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
 
   return (
     <SortableList
-      uploadedFileInfos={uploadedFileInfos}
       onDelete={onDelete}
       onSortEnd={onSortEnd}
       axis='xy'
@@ -217,11 +219,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
           </div>
         )}
       </div>
-      <FileThumbnailArea
-        uploadedFileInfos={uploadedFiles}
-        onDelete={onDelete}
-        onSort={handleSort}
-      />
+      <FileThumbnailArea onDelete={onDelete} onSort={handleSort} />
     </div>
   );
 };

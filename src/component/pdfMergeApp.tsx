@@ -1,13 +1,14 @@
 'use client';
 
 import FileDropArea from './fileDropArea';
-import { UploadFileInfo } from './fileDropArea';
 import { Button } from '@nextui-org/react';
 import { useState, useEffect } from 'react';
 import { mergePdfEndPoint, downloadEndPoint } from './utils';
 import { getSessionId } from './cookie';
 import axios from 'axios';
 import { showSuccessNotification } from './notify';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { uploadedFilesAtom } from './fileDropArea';
 
 enum MergeState {
   UNAIVIABLE = 'UNAIVIABLE',
@@ -18,7 +19,10 @@ enum MergeState {
 }
 
 export default function PdfMergeApp() {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfo[]>([]);
+  // const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfo[]>([]);
+  const uploadedFiles = useAtomValue(uploadedFilesAtom);
+  const setUploadedFiles = useSetAtom(uploadedFilesAtom);
+
   const [mergeState, setMergeState] = useState<MergeState>(
     MergeState.UNAIVIABLE,
   );
@@ -47,7 +51,7 @@ export default function PdfMergeApp() {
       headers: {
         'Content-Type': 'application/json',
       },
-      timeout: 5000,
+      timeout: 500000,
     };
     const request_body = {
       file_names: fileNames,
