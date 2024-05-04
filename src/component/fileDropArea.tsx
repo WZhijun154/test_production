@@ -11,9 +11,16 @@ import { getSessionId } from './cookie';
 import { uploadFilesEndPoint } from './utils';
 import axios from 'axios';
 import { showErrorNotification } from './notify';
+import { upload } from './upload';
+import { Progress } from '@nextui-org/react';
+
+export interface UploadFileInfoProps {
+  filename: string;
+  progress: number;
+}
 
 interface FileThumbnailProps {
-  fileName: string;
+  uploadedFileInfo: UploadFileInfoProps;
   onDelete: (fileName: string) => void;
 }
 
@@ -22,9 +29,13 @@ const DragHandle = SortableHandle(() => (
 ));
 
 const FileThumbnail: React.FC<FileThumbnailProps> = ({
-  fileName,
+  uploadedFileInfo,
   onDelete,
 }) => {
+  const progress = uploadedFileInfo.progress;
+  const fileName = uploadedFileInfo.filename;
+  const isUploading = progress !== undefined && progress < 100;
+
   return (
     <div className='relative'>
       <div className='relative flex items-center justify-center border-dashed text-center bg-gray-100 bg-opacity-50 border-2 border-gray-300 rounded-lg m-3'>
@@ -32,7 +43,8 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
           <DragHandle /> {/* Drag only by this handle */}
           <Icon icon='mdi:file-outline' className='text-2xl' />
           <p className='text-sm truncate w-full'>{fileName}</p>
-          <p className='text-xs'>Drag to sort</p>
+          {isUploading && <Progress value={progress} size='sm'></Progress>}
+          {!isUploading && <p className='text-xs'>Drag to sort</p>}
         </div>
       </div>
       <div
@@ -52,25 +64,27 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 };
 
 const SortableItem = SortableElement<FileThumbnailProps>(
-  ({ fileName, onDelete }: FileThumbnailProps) => {
-    return <FileThumbnail fileName={fileName} onDelete={onDelete} />;
+  ({ uploadedFileInfo, onDelete }: FileThumbnailProps) => {
+    return (
+      <FileThumbnail uploadedFileInfo={uploadedFileInfo} onDelete={onDelete} />
+    );
   },
 );
 
 interface SortableListProps {
-  fileNames: string[];
+  uploadedFileInfos: UploadFileInfoProps[];
   onDelete: (fileName: string) => void;
 }
 
 const SortableList = SortableContainer<SortableListProps>(
-  ({ fileNames, onDelete }: SortableListProps) => {
+  ({ uploadedFileInfos, onDelete }: SortableListProps) => {
     return (
       <div className='flex flex-row justify-start items-start gap-0'>
-        {fileNames.map((fileName, index) => (
+        {uploadedFileInfos.map((uploadedFileInfo, index) => (
           <SortableItem
             key={`item-${index}`}
             index={index}
-            fileName={fileName}
+            uploadedFileInfo={uploadedFileInfo}
             onDelete={onDelete}
           />
         ))}
@@ -80,13 +94,13 @@ const SortableList = SortableContainer<SortableListProps>(
 );
 
 interface FileThumbnailAreaProps {
-  fileNames: string[];
+  uploadedFileInfos: UploadFileInfoProps[];
   onDelete: (fileName: string) => void;
-  onSort: (newFileNames: string[]) => void;
+  onSort: (uploadedFileInfos: UploadFileInfoProps[]) => void;
 }
 
 const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
-  fileNames,
+  uploadedFileInfos,
   onDelete,
   onSort,
 }) => {
@@ -97,14 +111,18 @@ const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
     oldIndex: number;
     newIndex: number;
   }) => {
-    const newFileNames = arrayMove(fileNames, oldIndex, newIndex);
-    onSort(newFileNames);
-    console.log(newFileNames);
+    const newUploadedFileInfos = arrayMove(
+      uploadedFileInfos,
+      oldIndex,
+      newIndex,
+    );
+    onSort(newUploadedFileInfos);
+    console.log(newUploadedFileInfos);
   };
 
   return (
     <SortableList
-      fileNames={fileNames}
+      uploadedFileInfos={uploadedFileInfos}
       onDelete={onDelete}
       onSortEnd={onSortEnd}
       axis='xy'
@@ -113,13 +131,9 @@ const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
   );
 };
 
-export interface UploadFileInfo {
-  filename: string;
-}
-
 interface FileDropAreaProps {
-  uploadedFiles: UploadFileInfo[];
-  setUploadedFiles: React.Dispatch<React.SetStateAction<UploadFileInfo[]>>;
+  uploadedFiles: UploadFileInfoProps[];
+  setUploadedFiles: React.Dispatch<React.SetStateAction<UploadFileInfoProps[]>>;
   allowFileTypes?: string[];
 }
 
@@ -128,7 +142,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
   setUploadedFiles,
   allowFileTypes,
 }) => {
-  // const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfo[]>([]);
+  // const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfoProps[]>([]);
 
   const onDrop = (acceptedFiles: FileWithPath[]) => {
     acceptedFiles.forEach((file) => {
@@ -151,36 +165,36 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
     );
   };
 
-  const handleSort = (newFileNames: string[]) => {
-    setUploadedFiles(
-      newFileNames.map(
-        (filename) =>
-          uploadedFiles.find(
-            ((file) => file.filename === filename)!,
-          ) as UploadFileInfo,
-      ),
-    );
+  const handleSort = (newUploadedFileInfos: UploadFileInfoProps[]) => {
+    setUploadedFiles(newUploadedFileInfos);
   };
 
   const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    const session_id = encodeURIComponent(getSessionId() as string);
-    formData.append('file', file);
-    formData.append('session_id', session_id);
-
-    const response = await axios.post(uploadFilesEndPoint, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    upload({
+      file: file,
+      chunkSize: 512 * 1024,
+      endpoint: uploadFilesEndPoint,
+      sessionId: getSessionId() as string,
+      onStart: () => {
+        setUploadedFiles((prev) => [
+          ...prev,
+          { filename: file.name, progress: 0 },
+        ]);
+      },
+      onProgress: (percentage) => {
+        setUploadedFiles((prev) =>
+          prev.map((prevFile) =>
+            prevFile.filename === file.name
+              ? { filename: prevFile.filename, progress: percentage }
+              : prevFile,
+          ),
+        );
+      },
+      onSucess: () => {},
+      onError: (error) => {
+        console.error('Error:', error);
       },
     });
-
-    if (response.status === 200) {
-      const data = response.data;
-      setUploadedFiles((prev) => [...prev, { filename: data.filename }]);
-      console.log('Success:', data);
-    } else {
-      console.error('Error:', response.statusText);
-    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -204,7 +218,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
         )}
       </div>
       <FileThumbnailArea
-        fileNames={uploadedFiles.map((file) => file.filename)}
+        uploadedFileInfos={uploadedFiles}
         onDelete={onDelete}
         onSort={handleSort}
       />
