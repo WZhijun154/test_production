@@ -9,6 +9,7 @@ import axios from 'axios';
 import { showSuccessNotification } from './notify';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { uploadedFilesAtom } from './fileDropArea';
+import { UploadFileInfoProps } from './fileDropArea';
 
 enum MergeState {
   UNAIVIABLE = 'UNAIVIABLE',
@@ -28,7 +29,7 @@ export default function PdfMergeApp() {
   );
   const [mergedFileName, setMergedFileName] = useState<string>('');
 
-  const afterSetUploadedFiles = (newFiles: UploadFileInfo[]) => {
+  const afterSetUploadedFiles = (newFiles: UploadFileInfoProps[]) => {
     setMergeState(
       newFiles.length > 1 ? MergeState.STANDBY : MergeState.UNAIVIABLE,
     );
