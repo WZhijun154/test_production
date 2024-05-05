@@ -9,35 +9,35 @@ import {
 import { arrayMove } from 'react-sortable-hoc';
 import { getSessionId } from './cookie';
 import { uploadFilesEndPoint } from './utils';
-import axios from 'axios';
 import { showErrorNotification } from './notify';
 import { upload } from './upload';
 import { Progress } from '@nextui-org/react';
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 
 export interface UploadFileInfoProps {
-  filename: string;
+  fileName: string;
   progress: number;
 }
 
 interface FileThumbnailProps {
   uploadedFileInfo: UploadFileInfoProps;
-  onDelete: (fileName: string) => void;
 }
-
 export const uploadedFilesAtom = atom<UploadFileInfoProps[]>([]);
 
 const DragHandle = SortableHandle(() => (
   <div className='absolute w-full h-full'></div>
 ));
 
-const FileThumbnail: React.FC<FileThumbnailProps> = ({
-  uploadedFileInfo,
-  onDelete,
-}) => {
+const FileThumbnail: React.FC<FileThumbnailProps> = ({ uploadedFileInfo }) => {
   const progress = uploadedFileInfo.progress;
-  const fileName = uploadedFileInfo.filename;
+  const fileName = uploadedFileInfo.fileName;
   const isUploading = progress !== undefined && progress < 100;
+  const setUploadedFiles = useSetAtom(uploadedFilesAtom);
+  const onDelete = (fileName: string) => {
+    setUploadedFiles((prev) =>
+      prev.filter((file) => file.fileName !== fileName),
+    );
+  };
 
   return (
     <div className='relative'>
@@ -67,46 +67,30 @@ const FileThumbnail: React.FC<FileThumbnailProps> = ({
 };
 
 const SortableItem = SortableElement<FileThumbnailProps>(
-  ({ uploadedFileInfo, onDelete }: FileThumbnailProps) => {
-    return (
-      <FileThumbnail uploadedFileInfo={uploadedFileInfo} onDelete={onDelete} />
-    );
+  ({ uploadedFileInfo }: FileThumbnailProps) => {
+    return <FileThumbnail uploadedFileInfo={uploadedFileInfo} />;
   },
 );
 
-interface SortableListProps {
-  onDelete: (fileName: string) => void;
-}
-
-const SortableList = SortableContainer<SortableListProps>(
-  ({ onDelete }: SortableListProps) => {
-    const uploadedFileInfos = useAtomValue(uploadedFilesAtom);
-
-    return (
-      <div className='flex flex-row justify-start items-start gap-0'>
-        {uploadedFileInfos.map((uploadedFileInfo, index) => (
-          <SortableItem
-            key={`item-${index}`}
-            index={index}
-            uploadedFileInfo={uploadedFileInfo}
-            onDelete={onDelete}
-          />
-        ))}
-      </div>
-    );
-  },
-);
-
-interface FileThumbnailAreaProps {
-  onDelete: (fileName: string) => void;
-  onSort: (uploadedFileInfos: UploadFileInfoProps[]) => void;
-}
-
-const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
-  onDelete,
-  onSort,
-}) => {
+const SortableList = SortableContainer(() => {
   const uploadedFileInfos = useAtomValue(uploadedFilesAtom);
+
+  return (
+    <div className='flex flex-row justify-start items-start gap-0'>
+      {uploadedFileInfos.map((uploadedFileInfo, index) => (
+        <SortableItem
+          key={`item-${index}`}
+          index={index}
+          uploadedFileInfo={uploadedFileInfo}
+        />
+      ))}
+    </div>
+  );
+});
+
+const FileThumbnailArea: React.FC = () => {
+  const uploadedFileInfos = useAtomValue(uploadedFilesAtom);
+  const setUploadedFiles = useSetAtom(uploadedFilesAtom);
   const onSortEnd = ({
     oldIndex,
     newIndex,
@@ -119,33 +103,18 @@ const FileThumbnailArea: React.FC<FileThumbnailAreaProps> = ({
       oldIndex,
       newIndex,
     );
-    onSort(newUploadedFileInfos);
-    console.log(newUploadedFileInfos);
+    setUploadedFiles(newUploadedFileInfos);
   };
 
-  return (
-    <SortableList
-      onDelete={onDelete}
-      onSortEnd={onSortEnd}
-      axis='xy'
-      useDragHandle={true}
-    />
-  );
+  return <SortableList onSortEnd={onSortEnd} axis='xy' useDragHandle={true} />;
 };
 
 interface FileDropAreaProps {
-  uploadedFiles: UploadFileInfoProps[];
-  setUploadedFiles: React.Dispatch<React.SetStateAction<UploadFileInfoProps[]>>;
   allowFileTypes?: string[];
 }
 
-const FileDropArea: React.FC<FileDropAreaProps> = ({
-  uploadedFiles,
-  setUploadedFiles,
-  allowFileTypes,
-}) => {
-  // const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfoProps[]>([]);
-
+const FileDropArea: React.FC<FileDropAreaProps> = ({ allowFileTypes }) => {
+  const setUploadedFiles = useSetAtom(uploadedFilesAtom);
   const onDrop = (acceptedFiles: FileWithPath[]) => {
     acceptedFiles.forEach((file) => {
       if (allowFileTypes) {
@@ -161,16 +130,6 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
     });
   };
 
-  const onDelete = (fileName: string) => {
-    setUploadedFiles((prev) =>
-      prev.filter((file) => file.filename !== fileName),
-    );
-  };
-
-  const handleSort = (newUploadedFileInfos: UploadFileInfoProps[]) => {
-    setUploadedFiles(newUploadedFileInfos);
-  };
-
   const uploadFile = async (file: File) => {
     upload({
       file: file,
@@ -180,14 +139,14 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
       onStart: () => {
         setUploadedFiles((prev) => [
           ...prev,
-          { filename: file.name, progress: 0 },
+          { fileName: file.name, progress: 0 },
         ]);
       },
       onProgress: (percentage) => {
         setUploadedFiles((prev) =>
           prev.map((prevFile) =>
-            prevFile.filename === file.name
-              ? { filename: prevFile.filename, progress: percentage }
+            prevFile.fileName === file.name
+              ? { fileName: prevFile.fileName, progress: percentage }
               : prevFile,
           ),
         );
@@ -219,7 +178,7 @@ const FileDropArea: React.FC<FileDropAreaProps> = ({
           </div>
         )}
       </div>
-      <FileThumbnailArea onDelete={onDelete} onSort={handleSort} />
+      <FileThumbnailArea />
     </div>
   );
 };

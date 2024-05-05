@@ -20,9 +20,7 @@ enum MergeState {
 }
 
 export default function PdfMergeApp() {
-  // const [uploadedFiles, setUploadedFiles] = useState<UploadFileInfo[]>([]);
   const uploadedFiles = useAtomValue(uploadedFilesAtom);
-  const setUploadedFiles = useSetAtom(uploadedFilesAtom);
 
   const [mergeState, setMergeState] = useState<MergeState>(
     MergeState.UNAIVIABLE,
@@ -43,10 +41,10 @@ export default function PdfMergeApp() {
   const mergeButtonHandler = async () => {
     if (mergeState == MergeState.DONE) {
       window.location.href =
-        downloadEndPoint + '/' + getSessionId() + '/' + mergedFileName;
+        downloadEndPoint + getSessionId() + '/' + mergedFileName;
       return;
     }
-    const fileNames = uploadedFiles.map((file) => file.filename);
+    const fileNames = uploadedFiles.map((file) => file.fileName);
     const encodedSessionId = encodeURIComponent(getSessionId() as string);
     const config = {
       headers: {
@@ -114,11 +112,7 @@ export default function PdfMergeApp() {
         Combine multiple PDFs into one
       </h2>
       <div className='flex flex-col items-center justify-center gap-y-4 w-full'>
-        <FileDropArea
-          uploadedFiles={uploadedFiles}
-          setUploadedFiles={setUploadedFiles}
-          allowFileTypes={['application/pdf']}
-        />
+        <FileDropArea allowFileTypes={['application/pdf']} />
         <Button
           color={getButtonColor(mergeState)}
           isDisabled={

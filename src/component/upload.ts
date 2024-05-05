@@ -32,6 +32,7 @@ export const upload = async ({ file, chunkSize, endpoint, sessionId, onStart, on
             await axios.post(endpoint, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    
                 },
                 onUploadProgress: progressEvent => {
                     // Since we're not sure of the exact load this callback represents,
@@ -49,7 +50,6 @@ export const upload = async ({ file, chunkSize, endpoint, sessionId, onStart, on
             if (onError) {
                 onError(error);
             }
-            console.error('Error uploading chunk:', error);
             // Consider how to handle retries or continuation here
             break;  // Stop uploading if any chunk fails
         }
