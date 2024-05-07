@@ -27,9 +27,20 @@ module.exports = {
           '0%, 100%': { opacity: 1 },
           '50%': { opacity: 0.5 },
         },
+        animateIn: {
+          from: {
+            opacity: '0',
+            transform: 'translateY(10px)',
+          },
+          to: {
+            opacity: '1',
+            transform: 'translateY(0)',
+          },
+        },
       },
       animation: {
         pulse: 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        in: 'animateIn 0.3s ease 0.15s both',
       },
       transitionProperty: {
         bg: 'background-color',

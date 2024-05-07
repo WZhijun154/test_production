@@ -3,7 +3,7 @@
 import FileDropArea from './fileDropArea';
 import { Button } from '@nextui-org/react';
 import { useState, useEffect } from 'react';
-import { mergePdfEndPoint, downloadEndPoint } from './utils';
+import { mergePdfEndPoint, downloadEndPoint } from '../utils/endpoint';
 import { getSessionId } from './cookie';
 import axios from 'axios';
 import { showSuccessNotification } from './notify';
@@ -104,7 +104,7 @@ export default function PdfMergeApp() {
   };
 
   return (
-    <div className='flex flex-col items-center w-full h-screen'>
+    <div className='animate-in flex flex-col items-center w-full h-screen'>
       <h1 className='text-black text-3xl font-bold mb-2 mt-16'>
         Merge PDF Files Online
       </h1>

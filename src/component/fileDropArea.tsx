@@ -8,7 +8,7 @@ import {
 } from 'react-sortable-hoc';
 import { arrayMove } from 'react-sortable-hoc';
 import { getSessionId } from './cookie';
-import { uploadFilesEndPoint } from './utils';
+import { uploadFilesEndPoint } from '../utils/endpoint';
 import { showErrorNotification } from './notify';
 import { upload } from './upload';
 import { Progress } from '@nextui-org/react';
