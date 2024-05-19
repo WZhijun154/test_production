@@ -9,7 +9,7 @@ import {
 import { arrayMove } from 'react-sortable-hoc';
 import { getSessionId } from './cookie';
 import { uploadFilesEndPoint } from '../utils/endpoint';
-import { showErrorNotification } from './notify';
+import { showErrorNotification } from '../utils/notify';
 import { upload } from './upload';
 import { Progress } from '@nextui-org/react';
 import { atom, useAtomValue, useSetAtom } from 'jotai';

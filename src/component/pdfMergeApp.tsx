@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { mergePdfEndPoint, downloadEndPoint } from '../utils/endpoint';
 import { getSessionId } from './cookie';
 import axios from 'axios';
-import { showSuccessNotification } from './notify';
+import { showSuccessNotification } from '../utils/notify';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { uploadedFilesAtom } from './fileDropArea';
 import { UploadFileInfoProps } from './fileDropArea';
@@ -27,15 +27,11 @@ export default function PdfMergeApp() {
   );
   const [mergedFileName, setMergedFileName] = useState<string>('');
 
-  const afterSetUploadedFiles = (newFiles: UploadFileInfoProps[]) => {
-    setMergeState(
-      newFiles.length > 1 ? MergeState.STANDBY : MergeState.UNAIVIABLE,
-    );
-  };
-
   // Effect hook to react to changes in uploadedFiles
   useEffect(() => {
-    afterSetUploadedFiles(uploadedFiles);
+    setMergeState(
+      uploadedFiles.length > 1 ? MergeState.STANDBY : MergeState.UNAIVIABLE,
+    );
   }, [uploadedFiles]); // Dependency array includes uploadedFiles
 
   const mergeButtonHandler = async () => {

@@ -45,8 +45,27 @@ module.exports = {
       transitionProperty: {
         bg: 'background-color',
       },
+      clipPath: {
+        inset: 'inset(0 0 0 0)',
+      },
     },
   },
+  variants: {
+    extend: {
+      clipPath: ['responsive'],
+    },
+  },
+  plugins: [
+    function ({ addUtilities }) {
+      const newUtilities = {
+        '.clip-inset': {
+          'clip-path': 'inset(0 0 0 0)',
+        },
+        // Add more custom utilities as needed
+      };
+      addUtilities(newUtilities, ['responsive', 'hover']);
+    },
+    nextui(), // Ensure NextUI plugin is included correctly
+  ],
   darkMode: 'class',
-  plugins: [nextui()],
 };
