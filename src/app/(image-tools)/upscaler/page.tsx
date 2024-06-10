@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import CircleIcon from './icon';
+import CircleIcon from './_components/icon';
 import { FileDropArea } from '@/component/file-drop-area-v2';
 import { uploadToS3 } from '@/utils/upload';
 import { filesAtomForUpscale } from '@/component/file';
