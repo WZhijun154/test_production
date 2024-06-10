@@ -1,85 +1,201 @@
 'use client';
 import React, { useState } from 'react';
-import { Button } from '@nextui-org/react';
-import ReactCompareImage from 'react-compare-image';
 import { Icon } from '@iconify/react';
 import { CircleIcon } from './icon';
-import { FileDropArea } from '@/component/file-drop-area';
-import { uploadToS3 } from '@/utils/uploadToS3';
+import { FileDropArea } from '@/component/file-drop-area-v2';
+import { uploadToS3 } from '@/utils/upload';
 import { filesAtomForUpscale } from '@/component/file';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { Image } from '@nextui-org/react';
 import { showErrorNotification } from '@/utils/notify';
-import { FileThumbnail } from '@/component/file-thumbnail';
+import { ImageUpscaleTaskCard } from '@/component/image-task-card';
+import { FileInfoPropsForUpscale, UpscaleStatus } from '@/component/file';
 
 export default function Upscaler() {
-  const [originalImageUrl, setOriginalImageUrl] = useState('');
-  const [upscaledImageUrl, setUpscaledImageUrl] = useState('');
   const files = useAtomValue(filesAtomForUpscale);
   const setFiles = useSetAtom(filesAtomForUpscale);
 
-  async function onUpscaleButtonClick() {
-    // use the first file
-    if (files.length > 0) {
-      const file = files[0];
-      const imageUrl = file.fileUrl;
-      setOriginalImageUrl(imageUrl);
+  const setUploadStatus = (
+    file: FileInfoPropsForUpscale,
+    status: UpscaleStatus,
+  ) => {
+    setFiles((prev: FileInfoPropsForUpscale[]) =>
+      prev.map((prevFile: FileInfoPropsForUpscale) =>
+        prevFile.fileName === file.fileName
+          ? { ...prevFile, upscaleStatus: status }
+          : prevFile,
+      ),
+    );
+  };
 
-      const response = await fetch('/api/replicate/upscale', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+  const setUploadUrl = (file: FileInfoPropsForUpscale, url: string) => {
+    setFiles((prev: FileInfoPropsForUpscale[]) =>
+      prev.map((prevFile: FileInfoPropsForUpscale) =>
+        prevFile.fileName === file.fileName
+          ? { ...prevFile, upscaledUrl: url }
+          : prevFile,
+      ),
+    );
+  };
+
+  async function upscaleImage(file: FileInfoPropsForUpscale) {
+    setUploadStatus(file, UpscaleStatus.STARTED);
+
+    const imageUrl = file.fileUrl;
+
+    const response = await fetch('/api/replicate/upscale', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        replicateInput: {
+          image: imageUrl,
+          scale: 2,
+          face_enhance: false,
         },
-        body: JSON.stringify({
-          replicateInput: {
-            image: imageUrl,
-            scale: 2,
-            face_enhance: false,
-          },
-        }),
-      });
+      }),
+    });
 
-      if (response.ok) {
-        const result = await response.json();
-        const predictionId = result.id;
+    if (response.ok) {
+      const result = await response.json();
+      const predictionId = result.id;
 
-        // Step.5. Poll the GET request until the prediction is complete
-        let getResult;
-        let status;
-        do {
-          const getResponse = await fetch(
-            `/api/replicate/upscale?id=${predictionId}`,
-          );
-          getResult = await getResponse.json();
-          status = getResult.status;
-          if (status !== 'succeeded') {
-            await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 seconds before polling again
-          }
-        } while (status !== 'succeeded' && status !== 'failed');
-
-        if (status === 'succeeded') {
-          setUpscaledImageUrl(getResult.output); // Assuming the output is an array with image URLs
-        } else {
-          console.error('Prediction failed');
+      let getResult;
+      let status;
+      do {
+        const getResponse = await fetch(
+          `/api/replicate/upscale?id=${predictionId}`,
+        );
+        getResult = await getResponse.json();
+        status = getResult.status;
+        if (status !== 'succeeded') {
+          await new Promise((resolve) => setTimeout(resolve, 2000)); // Wait 2 seconds before polling again
+          setUploadStatus(file, UpscaleStatus.IN_PROGRESS);
         }
+      } while (status !== 'succeeded' && status !== 'failed');
+
+      if (status === 'succeeded') {
+        const upscaledUrl = getResult.output;
+        setUploadUrl(file, upscaledUrl);
+        setUploadStatus(file, UpscaleStatus.SUCCEEDED);
       } else {
-        showErrorNotification('Server Error! Failed to upscale image');
+        console.error('Prediction failed');
+        setUploadStatus(file, UpscaleStatus.FAILED);
       }
     } else {
-      showErrorNotification('Please upload an image first');
+      showErrorNotification('Server Error! Failed to upscale image');
+      setUploadStatus(file, UpscaleStatus.FAILED);
     }
   }
 
-  return (
-    <div className='flex flex-col items-center justify-center w-screen h-screen space-y-8 animate-appearance-in'>
-      {/* {files.map((file) => (
-        <Image src={file.fileUrl} />
-      ))} */}
+  const onDrop = async (files: File[]) => {
+    // when drop, upload the file to s3
+    files.forEach(async (file) => {
+      const uploadMethodProps = {
+        file: file,
+        onStart: () => {
+          const deleteMethod = () => {
+            cancel && cancel();
+            setFiles((prev: FileInfoPropsForUpscale[]) =>
+              prev.filter(
+                (prevFile: FileInfoPropsForUpscale) =>
+                  prevFile.fileName !== file.name,
+              ),
+            );
+          };
 
+          setFiles((prev: FileInfoPropsForUpscale[]) => {
+            const newFile = {
+              fileName: file.name,
+              fileUrl: '',
+              progress: 0,
+              deleteMethod,
+              upscaleMethod: () => {},
+              upscaleStatus: UpscaleStatus.NOT_READY,
+              upscaledUrl: '',
+            };
+            return [...prev, newFile];
+          });
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            setFiles((prev: FileInfoPropsForUpscale[]) => {
+              return prev.map((prevFile: FileInfoPropsForUpscale) =>
+                prevFile.fileName === file.name
+                  ? { ...prevFile, fileUrlOnClient: reader.result as string }
+                  : prevFile,
+              );
+            });
+          };
+          reader.readAsDataURL(file);
+        },
+
+        onProgress: (progress: number) => {
+          setFiles((prev: FileInfoPropsForUpscale[]) =>
+            prev.map((prevFile: FileInfoPropsForUpscale) =>
+              prevFile.fileName === file.name
+                ? { ...prevFile, progress }
+                : prevFile,
+            ),
+          );
+        },
+
+        onSuccess: (imageUrl: string) => {
+          setFiles((prev: FileInfoPropsForUpscale[]) =>
+            prev.map((prevFile: FileInfoPropsForUpscale) =>
+              prevFile.fileName === file.name
+                ? {
+                    ...prevFile,
+                    progress: 100,
+                    fileUrl: imageUrl,
+                    // upscaleMethod: () => upscaleImage(prevFile),
+                    upscaleStatus: UpscaleStatus.READY,
+                  }
+                : prevFile,
+            ),
+          );
+
+          setFiles((prev: FileInfoPropsForUpscale[]) =>
+            prev.map((prevFile: FileInfoPropsForUpscale) =>
+              prevFile.fileName === file.name
+                ? { ...prevFile, upscaleMethod: () => upscaleImage(prevFile) }
+                : prevFile,
+            ),
+          );
+
+          cancel = () => {};
+        },
+
+        onError: (error: any) => {
+          setFiles((prev: FileInfoPropsForUpscale[]) =>
+            prev.filter(
+              (prevFile: { fileName: string }) =>
+                prevFile.fileName !== file.name,
+            ),
+          );
+          showErrorNotification('Failed to upload file');
+          console.log(error);
+        },
+      };
+
+      const result = uploadToS3(uploadMethodProps);
+      const promise = result.promise;
+
+      let cancel = result.cancel;
+
+      try {
+        await promise;
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  };
+
+  return (
+    <div className='flex flex-col items-center justify-center w-screen space-y-8 animate-appearance-in pt-12'>
       <FileDropArea
-        uploadMethod={uploadToS3}
-        setFiles={setFiles}
         allowFileTypes={['image/jpeg', 'image/png', 'application/pdf', '']}
+        dropAction={onDrop}
       >
         <div className='flex flex-col items-center justify-center p-6 bg-indigo-400 rounded-lg shadow-lg overflow-hidden relative transition-all'>
           <div className='flex flex-col items-center justify-center relative transition-all hover:scale-125'>
@@ -111,24 +227,8 @@ export default function Upscaler() {
 
       <div className='flex flex-row gap-4'>
         {files.map((file) => (
-          <FileThumbnail file={file} iconifyIcon='bi:image-fill' />
+          <ImageUpscaleTaskCard file={file} />
         ))}
-      </div>
-
-      <Button
-        color='primary'
-        onClick={onUpscaleButtonClick}
-        className=' text-xl'
-        size='lg'
-      >
-        Upscale
-      </Button>
-
-      <div className='flex flex-col w-[100px] items-center justify-center'>
-        <ReactCompareImage
-          leftImage={originalImageUrl}
-          rightImage={upscaledImageUrl}
-        />
       </div>
     </div>
   );

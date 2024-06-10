@@ -14,6 +14,8 @@
     "@nextui-org/react": "^2.3.6",
     "@supabase/ssr": "^0.3.0",
     "@supabase/supabase-js": "^2.43.1",
+    "@tsparticles/engine": "^3.4.0",
+    "@tsparticles/react": "^3.0.0",
     "aws-sdk": "^2.1618.0",
     "axios": "^1.6.8",
     "express-session": "^1.18.0",
@@ -22,6 +24,7 @@
     "js-cookie": "^3.0.5",
     "next": "14.2.3",
     "next-session": "^4.0.5",
+    "next-themes": "^0.3.0",
     "react": "^18",
     "react-compare-image": "^3.4.0",
     "react-dom": "^18",
@@ -29,6 +32,7 @@
     "react-sortable-hoc": "^2.0.0",
     "socket.io": "^4.7.5",
     "sweetalert2": "^11.10.8",
+    "tsparticles": "^3.4.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

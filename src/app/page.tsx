@@ -1,8 +1,17 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type { NextPage } from 'next';
-import Content from '@/component/content';
 
 const Home: NextPage = () => {
-  return <Content />;
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/landing');
+  }, [router]);
+
+  return null;
 };
 
 export default Home;

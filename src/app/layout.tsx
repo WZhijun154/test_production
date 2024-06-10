@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { Source_Sans_3 } from 'next/font/google';
+import { Fredoka } from 'next/font/google';
 import Providers from './providers';
 import './globals.css';
 
-const source_sans = Source_Sans_3({ subsets: ['latin'], display: 'swap' });
+const fredoka = Fredoka({ subsets: ['latin'], display: 'swap' });
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={source_sans.className}>
+      <body className={fredoka.className}>
         <Providers>{children}</Providers>
       </body>
     </html>

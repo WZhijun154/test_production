@@ -4,7 +4,7 @@ import { Tabs, Tab, Avatar, Button } from '@nextui-org/react';
 import { useState, useRef, useEffect } from 'react';
 import ScrollButton from './scrollButton';
 import TransparentPlaceholder from './placeholder';
-import PdfMergeApp from './pdfMergeApp';
+import PdfMergeApp from './pdfMergeApp.tsx';
 
 const Content = () => {
   const tabsPostionRef = useRef<HTMLDivElement>(null);

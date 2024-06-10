@@ -1,17 +1,17 @@
 // lib/session.ts
 import { SessionOptions } from 'iron-session';
-import { v4 as uuidv4} from 'uuid';
 
 export const sessionOptions: SessionOptions = {
-  password: uuidv4(),
+  password: 'wangzhijunasdajngmnifogbdvbdragsdaw3434r34fev',
   cookieName: 'test_production',
   cookieOptions: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 0, // temporary cookie
+    maxAge: 60 * 60 * 24, // 1 day
+    sameSite: 'lax',
+    path: '/',
   },
 };
 
 export interface IronSessionData {
-    id: string;
+  id: string;
 }
-

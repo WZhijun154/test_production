@@ -1,19 +1,32 @@
 import React from 'react';
 import { useDropzone, DropzoneOptions, FileWithPath } from 'react-dropzone';
 import { showErrorNotification } from '../utils/notify';
-import { FileInfoProps } from './file';
+
+interface AppendMethods {
+  [key: string]: any; // You can replace `any` with a more specific type if known
+}
+
+interface AppendAttributes {
+  [key: string]: any; // You can replace `any` with a more specific type if known
+}
 
 interface FileDropAreaProps {
   allowFileTypes?: string[];
   children?: React.ReactNode;
-  setFiles: React.Dispatch<React.SetStateAction<FileInfoProps[]>>;
+  setFiles: React.Dispatch<React.SetStateAction<any>>;
   uploadMethod?: any;
+  appendMethodsToFiles?: AppendMethods;
+  appendAttributes?: AppendAttributes;
+  enableClientDataReader?: boolean;
 }
 
 export const FileDropArea: React.FC<FileDropAreaProps> = ({
   allowFileTypes,
   children,
   uploadMethod,
+  appendMethodsToFiles,
+  appendAttributes,
+  enableClientDataReader,
   setFiles,
 }) => {
   const onDrop = (acceptedFiles: FileWithPath[]) => {
@@ -29,19 +42,36 @@ export const FileDropArea: React.FC<FileDropAreaProps> = ({
           onStart: () => {
             const deleteMethod = () => {
               if (cancel) cancel();
-              setFiles((prev) =>
-                prev.filter((prevFile) => prevFile.fileName !== file.name),
+              setFiles((prev: any[]) =>
+                prev.filter(
+                  (prevFile: { fileName: string }) =>
+                    prevFile.fileName !== file.name,
+                ),
               );
             };
 
-            setFiles((prev) => [
+            setFiles((prev: any) => [
               ...prev,
               { fileName: file.name, fileUrl: '', progress: 0, deleteMethod },
             ]);
+
+            if (enableClientDataReader) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                setFiles((prev: any[]) =>
+                  prev.map((prevFile: { fileName: string }) =>
+                    prevFile.fileName === file.name
+                      ? { ...prevFile, fileUrlOnClient: reader.result }
+                      : prevFile,
+                  ),
+                );
+              };
+              reader.readAsDataURL(file);
+            }
           },
           onProgress: (progress: number) => {
-            setFiles((prev) =>
-              prev.map((prevFile) =>
+            setFiles((prev: any[]) =>
+              prev.map((prevFile: { fileName: string }) =>
                 prevFile.fileName === file.name
                   ? { ...prevFile, progress }
                   : prevFile,
@@ -49,13 +79,17 @@ export const FileDropArea: React.FC<FileDropAreaProps> = ({
             );
           },
           onSuccess: (imageUrl: string) => {
-            setFiles((prev) =>
-              prev.map((prevFile) =>
+            setFiles((prev: any[]) =>
+              prev.map((prevFile: { fileName: string }) =>
                 prevFile.fileName === file.name
                   ? {
                       ...prevFile,
                       progress: 100,
                       fileUrl: imageUrl,
+                      // append methods to the file
+                      ...appendMethodsToFiles,
+                      // append attribtues to the file
+                      ...appendAttributes,
                     }
                   : prevFile,
               ),
@@ -64,8 +98,11 @@ export const FileDropArea: React.FC<FileDropAreaProps> = ({
             cancel = undefined;
           },
           onError: (error: any) => {
-            setFiles((prev) =>
-              prev.filter((prevFile) => prevFile.fileName !== file.name),
+            setFiles((prev: any[]) =>
+              prev.filter(
+                (prevFile: { fileName: string }) =>
+                  prevFile.fileName !== file.name,
+              ),
             );
             showErrorNotification('Failed to upload file');
             console.log(error);

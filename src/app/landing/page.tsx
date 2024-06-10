@@ -39,7 +39,5 @@ export default function Component() {
   }, []);
 
   // Render the Image component only when the URL is ready
-  return (
-    <div>{url ? <Image src={url} alt='image' /> : <p>Loading image...</p>}</div>
-  );
+  return <div className='bg-gray-200 w-screen h-screen'></div>;
 }

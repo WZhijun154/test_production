@@ -1,7 +1,8 @@
 import { showErrorNotification } from './notify';
 import { FileWithPath } from 'react-dropzone';
+import { uploadFilesEndPoint } from './endpoint';
 
-export interface uploadToS3Props {
+export interface UploadMethodProps {
   file: FileWithPath;
   onStart: () => void;
   onProgress: (progress: number) => void;
@@ -17,7 +18,7 @@ export function uploadToS3({
   onSuccess,
   onError,
   onCancel,
-}: uploadToS3Props): { promise: Promise<string | null>; cancel: () => void } {
+}: UploadMethodProps): { promise: Promise<string | null>; cancel: () => void } {
   const xhr = new XMLHttpRequest();
 
   const promise = new Promise<string | null>(async (resolve, reject) => {
@@ -25,7 +26,7 @@ export function uploadToS3({
 
     try {
       const response = await fetch(
-        `/api/generate-presigned-url?fileName=${file.name}&fileType=${file.type}`
+        `/api/generate-presigned-url?fileName=${file.name}&fileType=${file.type}`,
       );
 
       if (!response.ok) {
@@ -82,6 +83,75 @@ export function uploadToS3({
 
   const cancel = () => {
     xhr.abort(); // Actively cancel the PUT request
+  };
+
+  return { promise, cancel };
+}
+
+export function uploadToFastAPI({
+  file,
+  onStart,
+  onProgress,
+  onSuccess,
+  onError,
+  onCancel,
+}: UploadMethodProps): { promise: Promise<string | null>; cancel: () => void } {
+  const xhr = new XMLHttpRequest();
+
+  const promise = new Promise<string | null>((resolve, reject) => {
+    onStart();
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = (event.loaded / event.total) * 100;
+        onProgress(progress);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText);
+        const fileUrl = response.fileUrl;
+        onSuccess(fileUrl);
+        resolve(fileUrl);
+      } else {
+        const errorMessage = `Upload failed with status ${xhr.status}`;
+        showErrorNotification(errorMessage);
+        onError(new Error(errorMessage));
+        resolve(null);
+      }
+    };
+
+    xhr.onerror = () => {
+      const errorMessage = 'Upload failed due to a network error';
+      showErrorNotification(errorMessage);
+      onError(new Error(errorMessage));
+      resolve(null);
+    };
+
+    xhr.onabort = () => {
+      onCancel?.();
+      resolve(null);
+    };
+
+    const sessionId = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('session-id='))
+      ?.split('=')[1];
+    xhr.open('PUT', uploadFilesEndPoint, true);
+    xhr.setRequestHeader('X-File-Name', file.name);
+    // set session id
+    if (sessionId) {
+      xhr.setRequestHeader('X-Session-ID', sessionId);
+    }
+    // use formdata
+    const formData = new FormData();
+    formData.append('file', file);
+    xhr.send(formData);
+  });
+
+  const cancel = () => {
+    xhr.abort();
   };
 
   return { promise, cancel };
