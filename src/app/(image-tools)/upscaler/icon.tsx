@@ -7,7 +7,7 @@ interface CircleIconProps {
   strokeWidth?: number;
 }
 
-export const CircleIcon: React.FC<CircleIconProps> = ({
+const CircleIcon: React.FC<CircleIconProps> = ({
   className,
   radius = 12,
   strokeWidth = 1,
@@ -36,3 +36,5 @@ export const CircleIcon: React.FC<CircleIconProps> = ({
     </div>
   );
 };
+
+export default CircleIcon;

@@ -3,8 +3,6 @@ import React from 'react';
 import { Tabs, Tab, Avatar, Button } from '@nextui-org/react';
 import { useState, useRef, useEffect } from 'react';
 import ScrollButton from './scrollButton';
-import TransparentPlaceholder from './placeholder';
-import PdfMergeApp from './pdfMergeApp.tsx';
 
 const Content = () => {
   const tabsPostionRef = useRef<HTMLDivElement>(null);
@@ -85,18 +83,13 @@ const Content = () => {
           }}
         >
           <Tab key='posts' title={<span>Pdf Merging</span>}>
-            <PdfMergeApp />
-            <TransparentPlaceholder />
+            Hello
           </Tab>
           <Tab key='likes' title='Likes'>
-            <TransparentPlaceholder />
-            <TransparentPlaceholder />
-            <TransparentPlaceholder />
+            <Button>Click me</Button>
           </Tab>
-          <Tab key='comments' title='Media'>
-            <TransparentPlaceholder />
-            <TransparentPlaceholder />
-            <TransparentPlaceholder />
+          <Tab key='comments' title='Comments'>
+            <Button>Click me</Button>
           </Tab>
         </Tabs>
       </div>

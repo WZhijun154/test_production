@@ -8,7 +8,7 @@ import {
 import { useAtomValue, useSetAtom } from 'jotai';
 import { FileDropArea } from '@/component/file-drop-area';
 import { uploadToFastAPI } from '@/utils/upload';
-import { ImageBgRemoveTaskCard } from '@/component/image-task-card';
+// import { ImageBgRemoveTaskCard } from '@/component/image-task-card';
 import { backendBaseUrl } from '@/utils/endpoint';
 import { showErrorNotification } from '@/utils/notify';
 
@@ -97,9 +97,9 @@ export default function BgRemover() {
           </div>
         </div>
       ))}
-      {files.map((file: FileInfoPropsForBgRemover) => (
-        <ImageBgRemoveTaskCard file={file} />
-      ))}
+      {/* {files.map((file: FileInfoPropsForBgRemover) => (
+        <ImageBgRemoveTaskCard file={file} key={file.fileName} />
+      ))} */}
     </div>
   );
 }

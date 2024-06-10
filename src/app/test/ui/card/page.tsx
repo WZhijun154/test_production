@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@nextui-org/react';
 
-export function LandingPageCard() {
+function LandingPageCard() {
   // Render the Image component only when the URL is ready
   return (
     <Card className='w-[512px] p-4 bg-main-100 flex-col flex' isHoverable>
@@ -13,7 +13,7 @@ export function LandingPageCard() {
   );
 }
 
-export function LandingCardForUpscaler() {
+function LandingCardForUpscaler() {
   return <div className='w-full flex flex-col'>Upscaler</div>;
 }
 

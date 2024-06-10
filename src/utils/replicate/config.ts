@@ -1,4 +1,1 @@
-
-
 export const REPLICATE_API_TOKEN = process.env.NEXT_PUBLIC_REPLICATE_API_TOKEN;
-

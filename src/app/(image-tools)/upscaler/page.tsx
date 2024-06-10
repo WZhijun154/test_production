@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
-import { CircleIcon } from './icon';
+import CircleIcon from './icon';
 import { FileDropArea } from '@/component/file-drop-area-v2';
 import { uploadToS3 } from '@/utils/upload';
 import { filesAtomForUpscale } from '@/component/file';
@@ -227,7 +227,7 @@ export default function Upscaler() {
 
       <div className='flex flex-row gap-4'>
         {files.map((file) => (
-          <ImageUpscaleTaskCard file={file} />
+          <ImageUpscaleTaskCard file={file} key={file.fileName} />
         ))}
       </div>
     </div>

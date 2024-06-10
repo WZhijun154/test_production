@@ -3,7 +3,6 @@
 import { Button } from '@nextui-org/react';
 import { useState, useEffect } from 'react';
 import { mergePdfEndPoint, downloadEndPoint } from '../utils/endpoint';
-import { getSessionId } from './cookie';
 import axios from 'axios';
 import { showSuccessNotification } from '../utils/notify';
 import { useAtomValue, useSetAtom } from 'jotai';
