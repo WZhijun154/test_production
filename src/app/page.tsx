@@ -13,7 +13,7 @@ import { semanticColors } from '@nextui-org/react';
 
 const Introduction = () => {
   return (
-    <div className='w-full relative flex flex-col items-center justify-center dark:bg-opacity-0 text-foreground bg-background backdrop-blur-sm'>
+    <div className='w-full relative flex flex-col items-center justify-center dark:bg-opacity-0 text-foreground bg-background'>
       <div className='z-10 relative flex flex-col items-start mt-[128px] mb-[96px] w-[768px]'>
         <p className='text-72px relative'>Enhance images</p>
         <p className='text-72px relative leading-[72px]'>with AI</p>
