@@ -143,14 +143,6 @@ const App = () => {
       (semanticColors.dark.foreground as Partial<{ DEFAULT: string }>)
         .DEFAULT || (semanticColors.dark.foreground as string);
 
-    const lightBackgroundColor =
-      (semanticColors.light.background as Partial<{ DEFAULT: string }>)
-        .DEFAULT || (semanticColors.light.background as string);
-
-    const lightForegroundColor =
-      (semanticColors.light.foreground as Partial<{ DEFAULT: string }>)
-        .DEFAULT || (semanticColors.light.foreground as string);
-
     return {
       background: {
         color: {
