@@ -134,19 +134,12 @@ export function uploadToFastAPI({
       resolve(null);
     };
 
-    const sessionId = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('session-id='))
-      ?.split('=')[1];
     xhr.open('PUT', uploadFilesEndPoint, true);
     xhr.setRequestHeader('X-File-Name', file.name);
-    // set session id
-    if (sessionId) {
-      xhr.setRequestHeader('X-Session-ID', sessionId);
-    }
     // use formdata
     const formData = new FormData();
     formData.append('file', file);
+    xhr.withCredentials = true; // allow cookies to be sent with the request
     xhr.send(formData);
   });
 

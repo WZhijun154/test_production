@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   BgRemoveStatus,
-  FileInfoPropsForBgRemover,
+  ImageFileInfoPropsForBgRemover,
   filesAtomForBgRemover,
 } from '@/component/file';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -16,9 +16,12 @@ export default function BgRemover() {
   const files = useAtomValue(filesAtomForBgRemover);
   const setFiles = useSetAtom(filesAtomForBgRemover);
 
-  const setBgRemovedUrl = (file: FileInfoPropsForBgRemover, url: string) => {
-    setFiles((prev: FileInfoPropsForBgRemover[]) =>
-      prev.map((prevFile: FileInfoPropsForBgRemover) =>
+  const setBgRemovedUrl = (
+    file: ImageFileInfoPropsForBgRemover,
+    url: string,
+  ) => {
+    setFiles((prev: ImageFileInfoPropsForBgRemover[]) =>
+      prev.map((prevFile: ImageFileInfoPropsForBgRemover) =>
         prevFile.fileName === file.fileName
           ? { ...prevFile, bgRemovedUrl: url }
           : prevFile,
@@ -26,7 +29,7 @@ export default function BgRemover() {
     );
   };
 
-  const bgRemove = async (file: FileInfoPropsForBgRemover) => {
+  const bgRemove = async (file: ImageFileInfoPropsForBgRemover) => {
     const imageUrl = file.fileUrl;
     const sessionId = document.cookie
       .split('; ')
@@ -88,7 +91,7 @@ export default function BgRemover() {
           </div>
         </div>
       </FileDropArea>
-      {files.map((file: FileInfoPropsForBgRemover) => (
+      {files.map((file: ImageFileInfoPropsForBgRemover) => (
         <div key={file.fileName} className='flex items-center space-x-4'>
           <div className='w-24 h-24 bg-gray-200 rounded-lg'></div>
           <div className='flex flex-col space-y-2'>
@@ -97,7 +100,7 @@ export default function BgRemover() {
           </div>
         </div>
       ))}
-      {/* {files.map((file: FileInfoPropsForBgRemover) => (
+      {/* {files.map((file: ImageFileInfoPropsForBgRemover) => (
         <ImageBgRemoveTaskCard file={file} key={file.fileName} />
       ))} */}
     </div>

@@ -8,8 +8,19 @@ import {
   Image,
   CardProps,
   Progress,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Textarea,
+  Link,
+  Divider,
+  Spacer,
 } from '@nextui-org/react';
 import { Icon } from '@iconify/react';
+import ReactCompareImage from 'react-compare-image';
 
 interface CardWithThumbnailProps {
   props?: CardProps;
@@ -133,25 +144,80 @@ function FileDropCard() {
   );
 }
 
-function ControlPanel() {
+interface ControlPanelProps {
+  action: any;
+}
+
+function ControlPanel({ action }: ControlPanelProps) {
   return (
     <Card className='w-[256px] h-[256px] flex flex-col items-center justify-center dark:bg-default-100/50'>
-      Control Panel
+      <Button onClick={action}>Click Me!</Button>
     </Card>
   );
 }
 
 function Title() {
-  return <h1 className='text-72px font-medium'>Image Upscaler</h1>;
+  return (
+    <h1 className='text-72px font-medium text-foreground'>Image Upscaler</h1>
+  );
+}
+
+interface ImageCompareModalProps {
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+  leftImage: string;
+  rightImage: string;
+}
+
+function ImageCompareModal({
+  isOpen,
+  onOpenChange,
+  leftImage,
+  rightImage,
+}: ImageCompareModalProps) {
+  return (
+    <Modal
+      size='lg'
+      shouldBlockScroll={false}
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+    >
+      <ModalContent>
+        {(onClose) => (
+          <ModalBody>
+            <ModalHeader className='flex-col gap-2 px-0 justify-center items-start'>
+              <p className='text-30px text-default-600 font-normal'>Details</p>
+              <p className='text-16px text-default-400 font-normal'>
+                Drag the slider to compare the original and upscaled images.
+              </p>
+            </ModalHeader>
+            <div className='pb-4'>
+              <ReactCompareImage
+                leftImage={leftImage}
+                rightImage={rightImage}
+              />
+            </div>
+          </ModalBody>
+        )}
+      </ModalContent>
+    </Modal>
+  );
 }
 
 export default function Upscaler() {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   return (
     <div className='flex flex-col gap-12 w-full items-center mt-[96px]'>
       <Title />
+      <ImageCompareModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        leftImage='https://images.pexels.com/photos/1851164/pexels-photo-1851164.jpeg'
+        rightImage='https://images.pexels.com/photos/1921336/pexels-photo-1921336.jpeg'
+      />
       <div className='flex-row flex gap-8'>
         <FileDropCard />
-        <ControlPanel />
+        <ControlPanel action={onOpen} />
       </div>
       <div className='grid max-w-8xl grid-cols-1 gap-5 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
         <CardWithThumbnail

@@ -9,6 +9,11 @@ export interface FileInfoProps {
   deleteMethod?: () => void;
 }
 
+export interface ImageFileInfoProps extends FileInfoProps {
+  width?: number;
+  height?: number;
+}
+
 export enum UpscaleStatus {
   NOT_READY = 'NOT_READY',
   READY = 'READY',
@@ -18,13 +23,13 @@ export enum UpscaleStatus {
   SUCCEEDED = 'SUCCEEDED',
 }
 
-export interface FileInfoPropsForUpscale extends FileInfoProps {
+export interface ImageFileInfoPropsForUpscale extends ImageFileInfoProps {
   upscaleMethod: any;
   upscaleStatus: UpscaleStatus;
   upscaledUrl: string;
 }
 
-export const filesAtomForUpscale = atom<FileInfoPropsForUpscale[]>([]);
+export const filesAtomForUpscale = atom<ImageFileInfoPropsForUpscale[]>([]);
 
 export enum BgRemoveStatus {
   NOT_READY = 'NOT_READY',
@@ -35,10 +40,10 @@ export enum BgRemoveStatus {
   SUCCEEDED = 'SUCCEEDED',
 }
 
-export interface FileInfoPropsForBgRemover extends FileInfoProps {
+export interface ImageFileInfoPropsForBgRemover extends ImageFileInfoProps {
   bgRemoveMethod: any;
   bgRemovedUrl: string;
   bgRemoveStatus: BgRemoveStatus;
 }
 
-export const filesAtomForBgRemover = atom<FileInfoPropsForBgRemover[]>([]);
+export const filesAtomForBgRemover = atom<ImageFileInfoPropsForBgRemover[]>([]);
