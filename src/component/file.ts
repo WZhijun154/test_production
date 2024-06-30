@@ -1,5 +1,4 @@
 import { atom } from 'jotai';
-import { v4 as uuidv4 } from 'uuid';
 
 export interface FileInfoProps {
   fileName: string;
@@ -14,7 +13,7 @@ export interface ImageFileInfoProps extends FileInfoProps {
   height?: number;
 }
 
-export enum UpscaleStatus {
+export enum BasicImageTaskStatus {
   NOT_READY = 'NOT_READY',
   READY = 'READY',
   STARTED = 'STARTED',
@@ -23,27 +22,14 @@ export enum UpscaleStatus {
   SUCCEEDED = 'SUCCEEDED',
 }
 
-export interface ImageFileInfoPropsForUpscale extends ImageFileInfoProps {
-  upscaleMethod: any;
-  upscaleStatus: UpscaleStatus;
-  upscaledUrl: string;
+export interface BasicImageTaskInfo extends ImageFileInfoProps {
+  taskMethod: any;
+  processedUrl: string;
+  status: BasicImageTaskStatus;
 }
 
-export const filesAtomForUpscale = atom<ImageFileInfoPropsForUpscale[]>([]);
+export const filesAtomForUpscaler = atom<BasicImageTaskInfo[]>([]);
 
-export enum BgRemoveStatus {
-  NOT_READY = 'NOT_READY',
-  READY = 'READY',
-  STARTED = 'STARTED',
-  IN_PROGRESS = 'IN_PROGRESS',
-  FAILED = 'FAILED',
-  SUCCEEDED = 'SUCCEEDED',
-}
+export const filesAtomForBgRemover = atom<BasicImageTaskInfo[]>([]);
 
-export interface ImageFileInfoPropsForBgRemover extends ImageFileInfoProps {
-  bgRemoveMethod: any;
-  bgRemovedUrl: string;
-  bgRemoveStatus: BgRemoveStatus;
-}
-
-export const filesAtomForBgRemover = atom<ImageFileInfoPropsForBgRemover[]>([]);
+export const filesAtomForColorizer = atom<BasicImageTaskInfo[]>([]);
