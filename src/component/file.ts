@@ -33,3 +33,7 @@ export const filesAtomForUpscaler = atom<BasicImageTaskInfo[]>([]);
 export const filesAtomForBgRemover = atom<BasicImageTaskInfo[]>([]);
 
 export const filesAtomForColorizer = atom<BasicImageTaskInfo[]>([]);
+
+export const filesAtomForDenoiser = atom<BasicImageTaskInfo[]>([]);
+
+export const filesAtomForDeblurer = atom<BasicImageTaskInfo[]>([]);
