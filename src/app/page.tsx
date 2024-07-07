@@ -198,12 +198,12 @@ const App = () => {
   if (init) {
     return (
       <div className='relative flex flex-col items-center'>
-        <Particles
+        {/* <Particles
           id='tsparticles'
           particlesLoaded={particlesLoaded}
           options={options}
           className='absolute top-0 left-0 w-full h-full z-0'
-        />
+        /> */}
         <Introduction />
         <Body />
       </div>

@@ -12,7 +12,7 @@ const Providers: React.FC<{ children: ReactNode }> = ({ children }) => {
     <AtomProvider>
       <NextUIProvider navigate={router.push}>
         <NextThemesProvider attribute='class' defaultTheme='dark'>
-          <main className='dark text-foreground bg-background'>{children}</main>
+          <main className='text-foreground bg-background'>{children}</main>
         </NextThemesProvider>
       </NextUIProvider>
     </AtomProvider>

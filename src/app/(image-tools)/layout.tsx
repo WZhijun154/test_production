@@ -101,13 +101,13 @@ export default function Layout({
   if (init) {
     return (
       <>
-        <Particles
+        {/* <Particles
           id='tsparticles'
           particlesLoaded={particlesLoaded}
           options={options}
           className='absolute inset-0 z-0'
-        />
-        <div className='absolute inset-0 backdrop-blur-md' />
+        /> */}
+        {/* <div className='absolute inset-0 backdrop-blur-md' /> */}
         {children}
       </>
     );

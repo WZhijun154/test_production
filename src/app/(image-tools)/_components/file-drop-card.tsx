@@ -10,7 +10,7 @@ export function FileDropCard() {
           '0 2px 0 hsla(0, 0%, 100%, 0.2), inset 0 2px 2px hsla(0, 0%, 0%, 0.7)',
       }}
     >
-      <Icon icon='bytesize:upload' className=' text-48px' />
+      <Icon icon='bytesize:upload' className='text-48px' />
       <p className='text-30px text-default-600'>
         Add file or drop image files here
       </p>

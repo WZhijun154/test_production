@@ -1,6 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-
 import { FileDropArea } from '@/component/file-drop-area-v2';
 import { uploadToFastAPI } from '@/utils/upload';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -22,7 +21,7 @@ function Title({ title }: TitleProps) {
 
 function ControlPanel() {
   return (
-    <Card className='w-[256px] h-[256px] flex flex-col items-center justify-center dark:bg-default-100/50'>
+    <Card className='w-[256px] h-[256px] flex flex-col items-center justify-center bg-content2 text-content-foreground2'>
       Control Panel
     </Card>
   );
